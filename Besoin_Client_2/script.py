@@ -11,7 +11,7 @@ def installer_dependances():
     subprocess.check_call([sys.executable, "-m", "pip", "install", *REQUIREMENTS])
 
 
-def generer_carte_complete(lat_saisie, lon_saisie, chemin_csv, chemin_model, chemin_sortie, k=None):
+def generer_carte_complete(lat_saisie, lon_saisie, chemin_csv, chemin_model, chemin_sortie):
     import joblib
     import pandas as pd
     import folium
@@ -19,15 +19,11 @@ def generer_carte_complete(lat_saisie, lon_saisie, chemin_csv, chemin_model, che
     df_irve = pd.read_csv(chemin_csv)
     df_irve = df_irve.dropna(subset=["latitude", "longitude"]).reset_index(drop=True)
 
-    if k is not None:
-        # Nombre de clusters choisi par l'utilisateur : on réentraîne à la
-        # demande plutôt que de réutiliser le modèle pré-entraîné figé.
-        from sklearn.cluster import KMeans
-        print(f"Entraînement d'un modèle KMeans avec K={k}...")
-        model = KMeans(n_clusters=k, random_state=42, n_init=10)
-        model.fit(df_irve[['latitude', 'longitude']])
-    else:
-        model = joblib.load(chemin_model)
+    # Le modèle est toujours chargé depuis un fichier pré-entraîné (jamais de
+    # réentraînement ici) : main.ipynb sauvegarde un modèle par valeur de K
+    # (kmeans_irve_model_k5.pkl, _k6.pkl, _k7.pkl) ainsi qu'un modèle par
+    # défaut (kmeans_irve_model.pkl).
+    model = joblib.load(chemin_model)
 
     # Prédire le cluster de TOUTES les bornes
     df_irve['cluster'] = model.predict(df_irve[['latitude', 'longitude']])
@@ -72,8 +68,8 @@ def parse_args():
     parser.add_argument("--lat", type=float, help="Latitude de la borne (ex: 48.8566). Demandée si absente.")
     parser.add_argument("--lon", type=float, help="Longitude de la borne (ex: 2.3522). Demandée si absente.")
     parser.add_argument("--csv", default="export_IA.csv", help="Chemin du fichier CSV source.")
-    parser.add_argument("--model", default="kmeans_irve_model.pkl", help="Chemin du modèle KMeans entraîné.")
-    parser.add_argument("--k", type=int, choices=[5, 6, 7], help="Nombre de clusters à utiliser (5, 6 ou 7). Si absent, réutilise le modèle pré-entraîné (--model).")
+    parser.add_argument("--model", default="kmeans_irve_model.pkl", help="Chemin du modèle KMeans pré-entraîné à charger (ignoré si --k est fourni).")
+    parser.add_argument("--k", type=int, choices=[5, 6, 7], help="Charge le modèle pré-entraîné pour ce K (kmeans_irve_model_k<K>.pkl), généré par main.ipynb. Ne réentraîne jamais.")
     parser.add_argument("--output", default="output", help="Dossier de sortie pour la carte générée.")
     parser.add_argument("--skip-install", action="store_true", help="Ne pas installer les dépendances avant exécution.")
     return parser.parse_args()
@@ -101,7 +97,9 @@ def main():
     os.makedirs(args.output, exist_ok=True)
     chemin_sortie = os.path.join(args.output, "carte_finale.html")
 
-    generer_carte_complete(lat, lon, args.csv, args.model, chemin_sortie, k=args.k)
+    chemin_model = f"kmeans_irve_model_k{args.k}.pkl" if args.k is not None else args.model
+
+    generer_carte_complete(lat, lon, args.csv, chemin_model, chemin_sortie)
 
 
 if __name__ == "__main__":

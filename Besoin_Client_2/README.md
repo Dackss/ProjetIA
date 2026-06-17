@@ -6,18 +6,18 @@ Sectorisation intelligente des bornes de recharge (IRVE) et visualisation sur ca
 
 | Fichier | Role |
 |---|---|
-| `main.ipynb` | Notebook d'analyse : entrainement du modele K-Means, calcul des metriques (Silhouette, Calinski-Harabasz, Davies-Bouldin) et choix du nombre de clusters (5, 6 ou 7). |
-| `script.py` | Script de production : charge le modele pre-entraine pour predire le cluster d'une nouvelle borne saisie et genere la carte interactive complete. |
+| `main.ipynb` | Notebook d'analyse : justification des variables et de l'algorithme, calcul des metriques (Silhouette, Calinski-Harabasz, Davies-Bouldin, inertie/elbow), discussion des resultats, entrainement et sauvegarde des modeles K-Means (K=5, 6 et 7). |
+| `script.py` | Script de production : charge un modele pre-entraine (jamais de reentrainement) pour predire le cluster d'une nouvelle borne saisie et genere la carte interactive complete. |
 | `export_IA.csv` | Donnees source IRVE utilisees par le notebook et le script. |
-| `kmeans_irve_model.pkl` | Modele de clustering entraine et serialise (charge a l'execution, jamais reentraine). |
+| `kmeans_irve_model.pkl` | Modele par defaut (K choisi via `k_choisi` dans le notebook), charge a l'execution sans reentrainement. |
+| `kmeans_irve_model_k5.pkl` / `_k6.pkl` / `_k7.pkl` | Un modele K-Means pre-entraine par valeur de K, generes par `main.ipynb`. `script.py --k` charge directement le fichier correspondant. |
 
 ## Prerequis
 
 - Python 3.x installe
 - Le fichier `export_IA.csv` present dans ce meme dossier (`Besoin_Client_2/`)
-- Le modele `kmeans_irve_model.pkl` deja entraine (genere par `main.ipynb`),
-  sauf si vous lancez `script.py` avec `--k` (qui entraine un modele a la
-  volee sans avoir besoin du `.pkl`)
+- Les modeles `.pkl` deja entraines (generes par `main.ipynb`) : `kmeans_irve_model.pkl`
+  pour l'usage par defaut, et `kmeans_irve_model_k5/6/7.pkl` pour l'option `--k`
 
 ## Execution
 
@@ -46,18 +46,18 @@ Sectorisation intelligente des bornes de recharge (IRVE) et visualisation sur ca
 | `--lat <valeur>` | Latitude de la borne saisie (demandee si absente) |
 | `--lon <valeur>` | Longitude de la borne saisie (demandee si absente) |
 | `--csv <chemin>` | Chemin du fichier CSV source (defaut : `export_IA.csv`) |
-| `--model <chemin>` | Chemin du modele KMeans entraine (defaut : `kmeans_irve_model.pkl`) |
-| `--k {5,6,7}` | Nombre de clusters a utiliser. Si fourni, reentraine un modele a la volee avec cette valeur au lieu de charger `--model`. |
+| `--model <chemin>` | Chemin du modele KMeans pre-entraine a charger (ignore si `--k` est fourni, defaut : `kmeans_irve_model.pkl`) |
+| `--k {5,6,7}` | Charge le modele pre-entraine pour ce K (`kmeans_irve_model_k<K>.pkl`). Ne reentraine jamais. |
 | `--output <dossier>` | Dossier de sortie pour la carte generee (defaut : `output`) |
 | `--skip-install` | Ne pas reinstaller les dependances |
 
-Exemple (modele pre-entraine) :
+Exemple (modele par defaut) :
 
 ```
 python script.py --lat 48.8566 --lon 2.3522 --output output --skip-install
 ```
 
-Exemple (choix du nombre de clusters) :
+Exemple (choix du nombre de clusters parmi les modeles pre-entraines) :
 
 ```
 python script.py --lat 48.8566 --lon 2.3522 --k 7 --skip-install
@@ -71,21 +71,44 @@ Le notebook `main.ipynb` genere en plus, dans le meme dossier `output/` :
 
 - `carte_clusters_irve.html` — Carte de clustering sur l'ensemble du jeu de donnees, une couleur distincte par cluster.
 - `metriques_clustering.png` — Graphique comparatif des scores Silhouette, Calinski-Harabasz et Davies-Bouldin selon K.
+- `elbow_inertie.png` — Courbe d'inertie (methode du coude), complement pour situer le nombre de clusters optimal.
+- `repartition_clusters.png` — Repartition du nombre de bornes par cluster pour le K choisi.
 
-Le modele entraine (`kmeans_irve_model.pkl`) est sauvegarde a la racine de
-`Besoin_Client_2/`, pas dans `output/`.
+Les modeles entraines (`kmeans_irve_model.pkl`, `kmeans_irve_model_k5/6/7.pkl`)
+sont sauvegardes a la racine de `Besoin_Client_2/`, pas dans `output/`.
 
 ## Justifications techniques
 
-### Apprentissage non supervise
+### Choix des variables
 
-Algorithme choisi : K-Means. Il regroupe les points geographiques
-(latitude/longitude) en zones compactes, ce qui convient a une sectorisation
-operationnelle. Le tableau de metriques (Silhouette, Calinski-Harabasz,
-Davies-Bouldin) est calcule pour K dans {2, 3, 4, 5, 6, 7, 12} afin de guider
-le choix, mais le nombre de clusters final est fixe par l'utilisateur parmi
-5, 6 ou 7 — la variable `k_choisi` dans `main.ipynb`, ou l'option `--k` de
-`script.py`.
+Seules `latitude` / `longitude` sont utilisees : le besoin est une sectorisation
+purement geographique des bornes, independante de leurs autres caracteristiques
+(puissance, operateur, type d'implantation...). `dropna` est applique sur ces
+deux colonnes uniquement, une borne sans coordonnees etant inutilisable pour
+le clustering comme pour la carte.
+
+### Choix de l'algorithme : K-Means
+
+K-Means place K centroides, assigne chaque borne au plus proche, recalcule les
+centroides comme moyenne des bornes assignees, et repete jusqu'a convergence
+(minimisation de l'inertie). Choisi face aux alternatives
+([scikit-learn clustering](https://scikit-learn.org/stable/modules/clustering.html))
+car rapide sur ~139 000 points et produit des zones compactes de taille
+comparable, adaptees a une sectorisation operationnelle. DBSCAN est ecarte
+(les bornes IRVE sont denses en ville et tres clairsemees en zone rurale, ce
+qui produirait un unique cluster urbain geant) ; le clustering hierarchique
+est ecarte pour sa complexite quadratique, inutilisable sur ce volume.
+
+### Choix des metriques et discussion des resultats
+
+Silhouette, Calinski-Harabasz et Davies-Bouldin sont calcules pour K dans
+{2, 3, 4, 5, 6, 7, 12}, complementes par la courbe d'inertie (elbow). Sur les
+donnees IRVE : le Silhouette progresse jusqu'a K=7 (creux a K=6), Calinski-Harabasz
+augmente avec K sans etre decisif seul (il favorise structurellement plus de
+clusters), Davies-Bouldin est minimal a K=5, et le coude de l'inertie se situe
+autour de K=5. L'ensemble converge vers la plage 5-7 comme meilleur compromis,
+d'ou la restriction du choix final a ces trois valeurs (detail dans
+`main.ipynb`, section "Discussion des resultats").
 
 ### Visualisation sur carte
 
@@ -99,8 +122,7 @@ regroupe les marqueurs par zone).
 
 ### Script de production
 
-Par defaut, le script `script.py` charge le modele via `joblib.load()` — aucun
-entrainement (`fit`) n'est realise a l'execution, ce qui garantit une
-prediction instantanee. Si `--k` est fourni (5, 6 ou 7), un nouveau modele
-KMeans est entraine a la volee avec ce nombre de clusters, sans toucher au
-fichier `kmeans_irve_model.pkl`.
+Le script `script.py` charge toujours un modele via `joblib.load()` — il ne
+reentraine jamais de modele a l'execution, conformement au cahier des charges.
+`--k` ne fait que selectionner quel fichier `.pkl` pre-entraine charger parmi
+ceux generes par `main.ipynb`.
