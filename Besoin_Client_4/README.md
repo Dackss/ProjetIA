@@ -19,7 +19,7 @@ Le problème est traité comme une **classification multi-classes** basée sur l
 Le projet est composé de deux éléments principaux :
 
 1. `main.ipynb` : Notebook Jupyter contenant toute la chaîne de traitement (Data Cleaning, Feature Engineering, Entraînement, Évaluation, Export).
-2. `predict_puissance.py` : Script Python autonome pour effectuer des prédictions en production en utilisant les modèles exportés.
+2. `main.py` : Script Python autonome pour effectuer des prédictions en production en utilisant les modèles exportés.
 
 ### Structure des dossiers
 

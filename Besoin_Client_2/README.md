@@ -7,10 +7,10 @@ Sectorisation intelligente des bornes de recharge (IRVE) et visualisation sur ca
 | Fichier | Role |
 |---|---|
 | `main.ipynb` | Notebook d'analyse : justification des variables et de l'algorithme, calcul des metriques (Silhouette, Calinski-Harabasz, Davies-Bouldin, inertie/elbow), discussion des resultats, entrainement et sauvegarde des modeles K-Means (K=5, 6 et 7). |
-| `script.py` | Script de production : charge un modele pre-entraine (jamais de reentrainement) pour predire le cluster d'une nouvelle borne saisie et genere la carte interactive complete. |
+| `main.py` | Script de production : charge un modele pre-entraine (jamais de reentrainement) pour predire le cluster d'une nouvelle borne saisie et genere la carte interactive complete. |
 | `export_IA.csv` | Donnees source IRVE utilisees par le notebook et le script. |
 | `kmeans_irve_model.pkl` | Modele par defaut (K choisi via `k_choisi` dans le notebook), charge a l'execution sans reentrainement. |
-| `kmeans_irve_model_k5.pkl` / `_k6.pkl` / `_k7.pkl` | Un modele K-Means pre-entraine par valeur de K, generes par `main.ipynb`. `script.py --k` charge directement le fichier correspondant. |
+| `kmeans_irve_model_k5.pkl` / `_k6.pkl` / `_k7.pkl` | Un modele K-Means pre-entraine par valeur de K, generes par `main.ipynb`. `main.py --k` charge directement le fichier correspondant. |
 
 ## Prerequis
 
@@ -25,7 +25,7 @@ Sectorisation intelligente des bornes de recharge (IRVE) et visualisation sur ca
 
    ```
    cd Besoin_Client_2
-   python script.py
+   python main.py
    ```
 
 2. Au premier lancement, le script installe automatiquement les dependances
@@ -33,7 +33,7 @@ Sectorisation intelligente des bornes de recharge (IRVE) et visualisation sur ca
    Pour sauter cette etape sur les lancements suivants :
 
    ```
-   python script.py --skip-install
+   python main.py --skip-install
    ```
 
 3. Si `--lat`/`--lon` ne sont pas fournis, le script les demande de maniere
@@ -54,13 +54,13 @@ Sectorisation intelligente des bornes de recharge (IRVE) et visualisation sur ca
 Exemple (modele par defaut) :
 
 ```
-python script.py --lat 48.8566 --lon 2.3522 --output output --skip-install
+python main.py --lat 48.8566 --lon 2.3522 --output output --skip-install
 ```
 
 Exemple (choix du nombre de clusters parmi les modeles pre-entraines) :
 
 ```
-python script.py --lat 48.8566 --lon 2.3522 --k 7 --skip-install
+python main.py --lat 48.8566 --lon 2.3522 --k 7 --skip-install
 ```
 
 ## Resultats generes (dans le dossier `output/`)
@@ -122,7 +122,7 @@ regroupe les marqueurs par zone).
 
 ### Script de production
 
-Le script `script.py` charge toujours un modele via `joblib.load()` — il ne
+Le script `main.py` charge toujours un modele via `joblib.load()` — il ne
 reentraine jamais de modele a l'execution, conformement au cahier des charges.
 `--k` ne fait que selectionner quel fichier `.pkl` pre-entraine charger parmi
 ceux generes par `main.ipynb`.

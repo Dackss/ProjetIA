@@ -4,7 +4,7 @@
 
 Ce script prédit le type d'implantation d'une borne de recharge electrique a partir de ses caracteristiques techniques (puissance, nombre de points de charge, types de prises, gratuite ou non).
 
-Il utilise un modele de Regression Logistique pre-entraine, charge depuis les fichiers `.pkl` situes dans le dossier `fichier_pkl/`.
+Il utilise un modele de Regression Logistique pre-entraine, charge depuis les fichiers `.pkl` situes a la racine du dossier.
 
 ---
 
@@ -12,16 +12,16 @@ Il utilise un modele de Regression Logistique pre-entraine, charge depuis les fi
 
 ```
 Besoin_Client_3/
-├── besoin_client_3.ipynb              # Notebook experimental
-├── predict_implantation.py            # Script de prediction interactif
-├── README.md                          # Ce fichier
-├── export_IA.csv                      # Base de donnees IRVE
-├── fichier_pkl/
-│   ├── scaler_pretraitement_b3.pkl    # StandardScaler sauvegarde
-│   └── modele_classification_b3.pkl   # Modele de classification sauvegarde
-├── justification_puissance.png        # Graphique de justification
-├── proportion_prise_ccs.png           # Graphique de justification
-└── matrice_confusion.png              # Matrice de confusion du modele
+├── main.ipynb                        # Notebook experimental
+├── main.py                           # Script de prediction interactif
+├── README.md                         # Ce fichier
+├── export_IA.csv                     # Base de donnees IRVE
+├── scaler_pretraitement_b3.pkl       # StandardScaler sauvegarde
+├── modele_classification_b3.pkl      # Modele de classification sauvegarde
+└── output/
+    ├── justification_puissance.png   # Graphique de justification
+    ├── proportion_prise_ccs.png      # Graphique de justification
+    └── matrice_confusion.png         # Matrice de confusion du modele
 ```
 
 
@@ -30,15 +30,15 @@ Besoin_Client_3/
 
 ### 1. Générer les modèles
 
-Exécuter le notebook `besoin_client_3.ipynb` en entier.
-Cela génère les fichiers `scaler_pretraitement_b3.pkl` et `modele_classification_b3.pkl` dans le dossier `fichier_pkl/`.
+Exécuter le notebook `main.ipynb` en entier.
+Cela génère les fichiers `scaler_pretraitement_b3.pkl` et `modele_classification_b3.pkl` à la racine du dossier.
 
-> Le script `predict_implantation.py` **charge** ces fichiers, il ne relance pas d'entraînement.
+> Le script `main.py` **charge** ces fichiers, il ne relance pas d'entraînement.
 
 ### 2. Lancer le script
 
 ```bash
-python predict_implantation.py
+python main.py
 ```
 
 Le script demande à l'utilisateur de saisir les caractéristiques de la borne directement dans le terminal :
@@ -79,7 +79,7 @@ Présence d'une prise CHAdeMO ? (True/False) : False
 ## Importer la fonction dans un autre fichier
 
 ```python
-from predict_implantation import predire_implantation
+from main import predire_implantation
 
 resultat = predire_implantation(
     puissance=150.0,
