@@ -19,7 +19,7 @@ import os
 # ─────────────────────────────────────────────────────────
 #  Chemin vers les fichiers pkl (modifiable si besoin)
 # ─────────────────────────────────────────────────────────
-PKL_DIR = 'fichier_pkl'
+PKL_DIR = '.'
 
 
 def charger_modeles():

@@ -23,9 +23,9 @@ Le projet est composé de deux éléments principaux :
 
 ### Structure des dossiers
 
-- `/data` : Dossier contenant le fichier source `export_IA.csv`.
-- `/fichier_pkl` : Contient les modèles entraînés (`.pkl`), les encodeurs (`LabelEncoder`), le `StandardScaler` et la liste des features.
-- `/figures` : Graphiques générés lors de l'analyse exploratoire (EDA) et de l'évaluation du modèle.
+- `export_IA.csv` : fichier source, à la racine du dossier.
+- Les modèles entraînés (`.pkl`), les encodeurs (`LabelEncoder`), le `StandardScaler` et la liste des features sont également sauvegardés à la racine.
+- `/output` : graphiques générés lors de l'analyse exploratoire (EDA) et de l'évaluation du modèle.
 
 ---
 
@@ -38,3 +38,5 @@ Assurez-vous d'avoir installé les bibliothèques nécessaires :
 ```bash
 pip install pandas numpy scikit-learn joblib matplotlib seaborn
 ```
+
+Le fichier `export_IA.csv` doit se trouver dans ce même dossier (`Besoin_Client_4/`), et les modèles `.pkl` doivent déjà avoir été générés par `main.ipynb` avant de lancer `main.py`.
