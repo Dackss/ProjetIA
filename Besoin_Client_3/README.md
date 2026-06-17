@@ -4,7 +4,7 @@
 
 Ce script prédit le type d'implantation d'une borne de recharge electrique a partir de ses caracteristiques techniques (puissance, nombre de points de charge, types de prises, gratuite ou non).
 
-Il utilise un modele de Regression Logistique pre-entraine, charge depuis les fichiers `.pkl` situes a la racine du dossier.
+Le notebook compare 4 algorithmes (Regression Logistique, Random Forest, Gradient Boosting, K-Nearest Neighbors) via GridSearchCV et retient automatiquement le meilleur (Random Forest, accuracy 0.755). Le modele final est charge depuis les fichiers `.pkl` situes a la racine du dossier.
 
 ---
 
@@ -55,6 +55,9 @@ Borne gratuite ? (True/False) : False
 Présence d'une prise CCS ? (True/False) : True
 Présence d'une prise Type 2 ? (True/False) : False
 Présence d'une prise CHAdeMO ? (True/False) : False
+Présence d'une prise domestique EF ? (True/False) : False
+Présence d'une autre prise non standard ? (True/False) : False
+Borne accessible aux deux-roues ? (True/False) : False
 
 ============================================================
   Implantation prédite : Station dédiée à la recharge rapide
@@ -73,6 +76,9 @@ Présence d'une prise CHAdeMO ? (True/False) : False
 | Prise CCS | `True` / `False` | Présence d'une prise combo CCS |
 | Prise Type 2 | `True` / `False` | Présence d'une prise Type 2 |
 | Prise CHAdeMO | `True` / `False` | Présence d'une prise CHAdeMO |
+| Prise EF | `True` / `False` | Présence d'une prise domestique (EF) |
+| Prise autre | `True` / `False` | Présence d'un connecteur non standard |
+| Deux-roues | `True` / `False` | Borne accessible aux deux-roues |
 
 ---
 
@@ -87,7 +93,10 @@ resultat = predire_implantation(
     gratuit=False,
     prise_ccs=True,
     prise_type2=False,
-    prise_chademo=False
+    prise_chademo=False,
+    prise_ef=False,
+    prise_autre=False,
+    deux_roues=False
 )
 print(resultat)
 ```

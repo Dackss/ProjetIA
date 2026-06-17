@@ -3,7 +3,8 @@ import pandas as pd
 import joblib
 
 
-def predire_implantation(puissance, nb_pdc, gratuit, prise_ccs, prise_type2, prise_chademo):
+def predire_implantation(puissance, nb_pdc, gratuit, prise_ccs, prise_type2, prise_chademo,
+                          prise_ef, prise_autre, deux_roues):
 
     try:
         # CHARGEMENT DES MODELES PREALABLEMENT ENREGISTRES
@@ -17,6 +18,9 @@ def predire_implantation(puissance, nb_pdc, gratuit, prise_ccs, prise_type2, pri
         ccs_num = mapping.get(str(prise_ccs).upper(), 0)
         t2_num = mapping.get(str(prise_type2).upper(), 0)
         chademo_num = mapping.get(str(prise_chademo).upper(), 0)
+        ef_num = mapping.get(str(prise_ef).upper(), 0)
+        autre_num = mapping.get(str(prise_autre).upper(), 0)
+        deux_roues_num = mapping.get(str(deux_roues).upper(), 0)
 
         # intégralité des connecteurs du marché
         donnees_brutes = {
@@ -26,6 +30,9 @@ def predire_implantation(puissance, nb_pdc, gratuit, prise_ccs, prise_type2, pri
             'prise_ccs': ccs_num,
             'prise_type2': t2_num,
             'prise_chademo': chademo_num,
+            'prise_ef': ef_num,
+            'prise_autre': autre_num,
+            'deux_roues': deux_roues_num,
         }
 
         # Conversion en DataFrame
@@ -78,6 +85,9 @@ if __name__ == "__main__":
     prise_ccs = demander_valeur("Présence d'une prise CCS ? (True/False) : ", str, ["True", "False"])
     prise_type2 = demander_valeur("Présence d'une prise Type 2 ? (True/False) : ", str, ["True", "False"])
     prise_chademo = demander_valeur("Présence d'une prise CHAdeMO ? (True/False) : ", str, ["True", "False"])
+    prise_ef = demander_valeur("Présence d'une prise domestique EF ? (True/False) : ", str, ["True", "False"])
+    prise_autre = demander_valeur("Présence d'une autre prise non standard ? (True/False) : ", str, ["True", "False"])
+    deux_roues = demander_valeur("Borne accessible aux deux-roues ? (True/False) : ", str, ["True", "False"])
 
     resultat = predire_implantation(
         puissance=puissance,
@@ -85,7 +95,10 @@ if __name__ == "__main__":
         gratuit=gratuit,
         prise_ccs=prise_ccs,
         prise_type2=prise_type2,
-        prise_chademo=prise_chademo
+        prise_chademo=prise_chademo,
+        prise_ef=prise_ef,
+        prise_autre=prise_autre,
+        deux_roues=deux_roues
     )
 
     print(f"  Implantation prédite : {resultat}")
