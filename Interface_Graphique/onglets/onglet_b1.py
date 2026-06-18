@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QWidget, QPushButton, QComboBox, QVBoxLayout, QProgressBar, QMessageBox,
 )
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWebEngineCore import QWebEngineSettings
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from Interface_Graphique.workers import FonctionWorker
@@ -34,6 +35,12 @@ class OngletB1(QWidget):
         self.barre_progression.hide()
 
         self.vue_carte = QWebEngineView()
+        # Folium charge leaflet.js/leaflet.css depuis un CDN ; par defaut QtWebEngine
+        # interdit a une page locale (file://) d'acceder a des ressources distantes,
+        # ce qui laisse "L" (Leaflet) indefini et la carte vide. On l'autorise ici.
+        self.vue_carte.settings().setAttribute(
+            QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True
+        )
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.bouton_generer)
