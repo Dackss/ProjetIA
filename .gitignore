@@ -219,3 +219,5 @@ __marimo__/
 # Ignorer le dossier data
 data/
 *.html
+# Large model file exceeding GitHub 100MB limit
+Besoin_Client_3/modele_classification_b3.pkl
