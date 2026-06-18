@@ -29,22 +29,25 @@ Sectorisation intelligente des bornes de recharge (IRVE) et visualisation sur ca
    ```
 
 2. Au premier lancement, le script installe automatiquement les dependances
-   (pandas, numpy, matplotlib, seaborn, folium, scikit-learn, joblib) via pip.
+   (pandas, numpy, matplotlib, seaborn, folium, scikit-learn, joblib, geopy) via pip.
    Pour sauter cette etape sur les lancements suivants :
 
    ```
    python main.py --skip-install
    ```
 
-3. Si `--lat`/`--lon` ne sont pas fournis, le script les demande de maniere
-   interactive (ex : `48.8566` / `2.3522`).
+3. Si ni `--adresse` ni `--lat`/`--lon` ne sont fournis, le script demande de
+   maniere interactive une adresse/ville (geocodee automatiquement via
+   Nominatim/OpenStreetMap, necessite internet) ou, si laissee vide, des
+   coordonnees lat/lon brutes (ex : `48.8566` / `2.3522`).
 
 ## Options disponibles
 
 | Option | Description |
 |---|---|
-| `--lat <valeur>` | Latitude de la borne saisie (demandee si absente) |
-| `--lon <valeur>` | Longitude de la borne saisie (demandee si absente) |
+| `--adresse <texte>` | Adresse ou ville de la borne (ex: `"10 rue de Rivoli, Paris"`), geocodee automatiquement. Prioritaire sur `--lat`/`--lon` si fournie. |
+| `--lat <valeur>` | Latitude de la borne saisie (demandee si absente et `--adresse` non fourni) |
+| `--lon <valeur>` | Longitude de la borne saisie (demandee si absente et `--adresse` non fourni) |
 | `--csv <chemin>` | Chemin du fichier CSV source (defaut : `export_IA.csv`) |
 | `--model <chemin>` | Chemin du modele KMeans pre-entraine a charger (ignore si `--k` est fourni, defaut : `kmeans_irve_model.pkl`) |
 | `--k {5,6,7}` | Charge le modele pre-entraine pour ce K (`kmeans_irve_model_k<K>.pkl`). Ne reentraine jamais. |
@@ -65,7 +68,7 @@ python main.py --lat 48.8566 --lon 2.3522 --k 7 --skip-install
 
 ## Resultats generes (dans le dossier `output/`)
 
-- `carte_finale.html` — Carte interactive : toutes les bornes colorees par cluster (un calque par cluster, sans regroupement visuel), plus le point saisi par l'utilisateur (marqueur etoile noire).
+- `carte_clusters_borne_recherchee.html` — Carte interactive : toutes les bornes colorees par cluster (un calque par cluster, sans regroupement visuel), plus le point saisi par l'utilisateur (marqueur etoile noire). Chaque borne a un popup (commune/implantation/puissance au clic) et une legende fixe (coin bas-gauche) resume chaque cluster : effectif, part du total, position moyenne.
 
 Le notebook `main.ipynb` genere en plus, dans le meme dossier `output/` :
 
@@ -119,6 +122,13 @@ meilleure lisibilite des clusters. Chaque cluster est rendu dans son propre
 regroupes par proximite geographique afin de garder une couleur distincte et
 lisible pour chaque cluster (contrairement a la carte du Besoin Client 1, qui
 regroupe les marqueurs par zone).
+
+**Ajouts pour l'experience utilisateur :** popup (commune/implantation/puissance)
+sur chaque borne au lieu d'un point muet ; legende HTML fixe resumant chaque
+cluster (effectif, % du total, position moyenne) — plus parlant qu'un simple
+"Cluster 0/1/2..." dans le `LayerControl` ; saisie par adresse/ville (geocodee
+via `geopy`/Nominatim) en plus de la saisie lat/lon brute, pour un usage non
+technique.
 
 ### Script de production
 

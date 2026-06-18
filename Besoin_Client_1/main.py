@@ -38,7 +38,7 @@ def encoder_implantation(df_b1, chemin_encoder):
     return df_b1
 
 
-def generer_carte_implantation(df_source, chemin_sortie, message_succes):
+def generer_carte_implantation(df_source, chemin_sortie, message_succes, plafond_par_groupe=8000):
     import folium
     from folium.plugins import MarkerCluster
 
@@ -48,8 +48,17 @@ def generer_carte_implantation(df_source, chemin_sortie, message_succes):
         calque = folium.FeatureGroup(name=f"Implantation : {type_impl}")
         cluster = MarkerCluster(options={'maxClusterRadius': 50}).add_to(calque)
 
-        for lat, lon in sous_df[['latitude', 'longitude']].values:
-            folium.Marker(location=[lat, lon]).add_to(cluster)
+        # Au-dela de `plafond_par_groupe` marqueurs, on echantillonne : le fichier HTML
+        # genere etait sinon trop lourd (~30 Mo, un marqueur par borne) pour un chargement
+        # fluide dans le navigateur. Echantillon aleatoire (seed fixe) pour rester reproductible.
+        if len(sous_df) > plafond_par_groupe:
+            sous_df = sous_df.sample(plafond_par_groupe, random_state=42)
+
+        for lat, lon, puissance in sous_df[['latitude', 'longitude', 'puissance']].values:
+            folium.Marker(
+                location=[lat, lon],
+                popup=f"{type_impl}<br>Puissance : {puissance:.1f} kW",
+            ).add_to(cluster)
 
         calque.add_to(carte)
 

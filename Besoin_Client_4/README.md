@@ -112,7 +112,8 @@ Besoin_Client_4/
     ├── comparaison_algorithmes_b4.png    # Comparaison des 4 algorithmes (CV F1-macro / accuracy / F1)
     ├── rapport_classification_b4.png     # Précision/rappel/f1 par classe (modèle retenu)
     ├── matrice_confusion_b4.png          # Matrice de confusion du modèle
-    └── feature_importance_b4.png         # Importance des variables (modèle retenu)
+    ├── feature_importance_b4.png         # Importance des variables (modèle retenu)
+    └── f1_par_classe_b4.png              # F1-score par classe (modèle retenu)
 ```
 
 ---
