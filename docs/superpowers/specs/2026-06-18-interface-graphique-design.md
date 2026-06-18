@@ -62,6 +62,8 @@ Contrainte : ce changement de cwd n'est pas thread-safe si deux besoins s'exécu
 - Bouton "Générer la carte" → `QThread` (géocodage réseau + génération carte, durée variable) + `QProgressBar` indéterminé + message d'erreur clair si géocodage échoue (adresse introuvable / pas d'internet) sans crasher l'appli.
 - Résultat dans un `QWebEngineView`.
 
+**Correction par rapport à la première version de ce spec** : `generer_carte_complete` de B2 n'a **pas** d'échantillonnage existant (contrairement à B1) — elle itère les ~139 000 lignes à chaque appel (~1-2 min observé). Avant de l'utiliser dans la GUI, on ajoute un paramètre `plafond_par_groupe=8000` à `Besoin_Client_2/main.py::generer_carte_complete`, même logique que B1 (échantillon aléatoire par cluster, seed fixe, au-delà du plafond). C'est une amélioration du script B2 lui-même, pas un hack GUI-only — bénéficie aussi à qui lance `main.py` en CLI.
+
 ## Onglet B3 — Prédiction implantation
 
 Formulaire mappé 1:1 sur les paramètres de `predire_implantation` :
