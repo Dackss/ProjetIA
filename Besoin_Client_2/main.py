@@ -57,7 +57,7 @@ def construire_legende(df_irve, couleurs):
     """)
 
 
-def generer_carte_complete(lat_saisie, lon_saisie, chemin_csv, chemin_model, chemin_sortie):
+def generer_carte_complete(lat_saisie, lon_saisie, chemin_csv, chemin_model, chemin_sortie, plafond_par_groupe=8000):
     import joblib
     import pandas as pd
     import folium
@@ -86,7 +86,21 @@ def generer_carte_complete(lat_saisie, lon_saisie, chemin_csv, chemin_model, che
     for cluster_id in sorted(df_irve['cluster'].unique()):
         cluster_groups[cluster_id] = folium.FeatureGroup(name=f"Cluster {cluster_id}").add_to(carte)
 
-    for _, row in df_irve.iterrows():
+    # Au-dela de `plafond_par_groupe` marqueurs par cluster, on echantillonne : le
+    # fichier HTML genere etait sinon trop lent a produire/charger (~139 000 marqueurs
+    # avec popup, 1-2 min). Meme logique que Besoin_Client_1 (echantillon aleatoire,
+    # seed fixe, par groupe plutot que global pour garder chaque cluster represente).
+    # Boucle explicite (plutot que groupby(...).apply(...)) : sur pandas >= 2.2, apply
+    # exclut desormais la colonne de groupement ('cluster') du resultat, ce qui cassait
+    # l'acces a row['cluster'] plus bas.
+    groupes_echantillonnes = []
+    for _, sous_df in df_irve.groupby('cluster'):
+        if len(sous_df) > plafond_par_groupe:
+            sous_df = sous_df.sample(plafond_par_groupe, random_state=42)
+        groupes_echantillonnes.append(sous_df)
+    df_a_afficher = pd.concat(groupes_echantillonnes)
+
+    for _, row in df_a_afficher.iterrows():
         cluster_id = int(row['cluster'])
         texte_popup = "<br>".join(str(row[c]) for c in colonnes_popup) if colonnes_popup else f"Cluster {cluster_id}"
         folium.CircleMarker(
