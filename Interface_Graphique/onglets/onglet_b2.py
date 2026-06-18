@@ -62,24 +62,26 @@ class OngletB2(QWidget):
         self.bouton_generer.setEnabled(False)
         self.barre_progression.show()
 
-        self._worker = FonctionWorker(self._generer_carte_en_arriere_plan)
+        lat = self.latitude.value()
+        lon = self.longitude.value()
+        texte_adresse = self.adresse.text().strip()
+        k = int(self.k_choisi.currentText())
+
+        self._worker = FonctionWorker(self._generer_carte_en_arriere_plan, lat, lon, texte_adresse, k)
         self._worker.termine.connect(self._sur_succes)
         self._worker.erreur.connect(self._sur_erreur)
         self._worker.start()
 
-    def _generer_carte_en_arriere_plan(self):
+    def _generer_carte_en_arriere_plan(self, lat, lon, texte_adresse, k):
         sys.path.insert(0, REPO_ROOT)
         from Besoin_Client_2.main import geocoder_adresse, generer_carte_complete
 
-        lat, lon = self.latitude.value(), self.longitude.value()
-        texte_adresse = self.adresse.text().strip()
         if texte_adresse:
             resultat = geocoder_adresse(texte_adresse)
             if resultat is None:
                 raise ValueError(f"Adresse introuvable : '{texte_adresse}'")
             lat, lon = resultat
 
-        k = int(self.k_choisi.currentText())
         chemin_csv = os.path.join(BESOIN_2_DIR, "export_IA.csv")
         chemin_model = os.path.join(BESOIN_2_DIR, f"kmeans_irve_model_k{k}.pkl")
         chemin_sortie = os.path.join(BESOIN_2_DIR, "output", "carte_clusters_borne_recherchee.html")
