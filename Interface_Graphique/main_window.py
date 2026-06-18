@@ -1,6 +1,7 @@
 # Interface_Graphique/main_window.py
 from PySide6.QtWidgets import QMainWindow, QTabWidget, QWidget, QLabel, QVBoxLayout
 from Interface_Graphique.onglets.onglet_b3 import OngletB3
+from Interface_Graphique.onglets.onglet_b4 import OngletB4
 
 
 def _onglet_placeholder(texte):
@@ -22,4 +23,4 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(_onglet_placeholder("B1 — a venir"), "B1 — Cartes")
         self.tabs.addTab(_onglet_placeholder("B2 — a venir"), "B2 — Clustering")
         self.tabs.addTab(OngletB3(), "B3 — Implantation")
-        self.tabs.addTab(_onglet_placeholder("B4 — Puissance"), "B4 — Puissance")
+        self.tabs.addTab(OngletB4(), "B4 — Puissance")
